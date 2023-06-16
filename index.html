@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="index.js" defer></script>
+</head>
+<body>
+    <h1>JSON File mit allen Pokemon Daten erstellen</h1>
+    <div id="text">
+        In diesem Auftrag geht es darum Daten von einer API (<a href="https://pokeapi.co/" target="#">https://pokeapi.co/</a>) zu holen und diese Daten schön darzustellen.<br><br>
+        Ich möchte nur die Daten von Pokemon haben, die in dem aktuellsten pokemonspiel erhältlich sind. 
+        Ich könnte die API Mehrfach ausfragen, aber die Daten ändern sich nicht.<br><br>
+        Deshalb macht es mehr Sinn alle Daten nur einmal zu holen und diese als JSON abzuspeichern.
+        Wie ich das gemacht habe zeige ich auf dieser Seite schritt für Schritt.<br><br>
+        Zuerst wollte ich die ID von jedem Pokemon haben, dass momentan erhältlich ist. 
+        Um das zu tun gehe ich auf die Pokedex Seite des aktuellsten Spieles (<a href="https://pokeapi.co/api/v2/pokedex/31" target="#">https://pokeapi.co/api/v2/pokedex/31</a>).
+    </div>
+    <textarea id="pokeJson" cols="500"></textarea>
+    <br><br>
+    <button onclick="getPokemonIds()" id="button1" class="active">Pokemon ID's holen</button>
+    <button onclick="getPokes()" id="button2" class="">Nächster Schritt</button>
+
+</body>
+</html>
