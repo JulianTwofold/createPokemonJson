@@ -1,12 +1,14 @@
 let aviablePokemon: number[] = [];
 let pokemon: any[] = [];
 let abilities: any;
-let stats;
+let stats: number[];
 let imgUrl: string;
 let statTotal: number;
-let requestDone: number = 0;
-let failedRequests: number[] = [];
+let successfullRequests: number = 0;
+let failedRequests: number = 0;
 let pokemonAsJSON: any;
+
+declare let saveAs: any;
 
 let getJSON = function (url: any, callback: any) {
     var xhr = new XMLHttpRequest();
@@ -55,8 +57,6 @@ function nextStep(){
         }
         document.getElementById('button1')!.onclick = function(){};
         document.getElementById("button1")?.classList.remove("active");
-        document.getElementById('button2')!.onclick = function(){};
-        document.getElementById("button2")?.classList.add("active");
     };
     document.getElementById("button1")?.classList.add("active");
     document.getElementById("button1")!.innerText = "Pokemondaten holen";
@@ -69,7 +69,8 @@ function makeDataRequest(poke: number) {
     getJSON("https://pokeapi.co/api/v2/pokemon/" + poke, function (err: any, data: any) {
         if (err !== null) {
             //alert('Something went wrong: ' + err);
-            failedRequests.push(poke);
+            failedRequests++;
+            showCurrentInformation()
             return;
         }
         stats = [];
@@ -82,7 +83,8 @@ function makeDataRequest(poke: number) {
         }
         if (statTotal < 430) {
             console.log(data.name + " stat total of " + statTotal + " is too small");
-            requestDone++;
+            successfullRequests++;
+            showCurrentInformation()
             return;
         }
         console.log("*** " + data.name + " stat total of " + statTotal + " is good Enough");
@@ -98,10 +100,22 @@ function makeDataRequest(poke: number) {
         pokemon.push({ name: data.name, abilities: abilities, imageSrc: data.sprites.other['official-artwork'].front_default, stats: stats });
         pokemonAsJSON = {name: data.name, abilities: abilities, imageSrc: data.sprites.other['official-artwork'].front_default, stats: stats}+",";
         document.getElementById("pokeJson")!.innerHTML += "{name: "+data.name+", abilities: "+abilities+", imageSrc: "+data.sprites.other['official-artwork'].front_default+", stats: "+stats+"},";
-        requestDone++;
+        successfullRequests++;
+        showCurrentInformation()
     });
 }
 
+function showCurrentInformation(){
+    document.getElementById("pokeJson")!.innerHTML = "Total Requests: "+aviablePokemon.length + "\nSuccessfull: "+successfullRequests+"\nFailed Requests: "+failedRequests+"\n"+JSON.stringify(pokemon[pokemon.length-1]);
+    if(successfullRequests+failedRequests == aviablePokemon.length){
+        document.getElementById('button2')!.onclick = function(){
+            createJson();
+        };
+        document.getElementById("button2")?.classList.add("active");
+    }
+}
+
 function createJson() {
-    //print json.stringify pokemon[]
+    var blob = new Blob([JSON.stringify(pokemon)], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, "pokemon.json"); 
 }

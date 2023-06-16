@@ -4,8 +4,8 @@ var abilities;
 var stats;
 var imgUrl;
 var statTotal;
-var requestDone = 0;
-var failedRequests = [];
+var successfullRequests = 0;
+var failedRequests = 0;
 var pokemonAsJSON;
 var getJSON = function (url, callback) {
     var xhr = new XMLHttpRequest();
@@ -49,15 +49,13 @@ function nextStep() {
     document.getElementById('button2').onclick = function () { };
     (_a = document.getElementById("button2")) === null || _a === void 0 ? void 0 : _a.classList.remove("active");
     document.getElementById('button1').onclick = function () {
-        var _a, _b;
+        var _a;
         document.getElementById("pokeJson").innerText = "";
         for (var i = 0; i < aviablePokemon.length; i++) {
             makeDataRequest(aviablePokemon[i]);
         }
         document.getElementById('button1').onclick = function () { };
         (_a = document.getElementById("button1")) === null || _a === void 0 ? void 0 : _a.classList.remove("active");
-        document.getElementById('button2').onclick = function () { };
-        (_b = document.getElementById("button2")) === null || _b === void 0 ? void 0 : _b.classList.add("active");
     };
     (_b = document.getElementById("button1")) === null || _b === void 0 ? void 0 : _b.classList.add("active");
     document.getElementById("button1").innerText = "Pokemondaten holen";
@@ -68,7 +66,8 @@ function makeDataRequest(poke) {
     getJSON("https://pokeapi.co/api/v2/pokemon/" + poke, function (err, data) {
         if (err !== null) {
             //alert('Something went wrong: ' + err);
-            failedRequests.push(poke);
+            failedRequests++;
+            showCurrentInformation();
             return;
         }
         stats = [];
@@ -81,7 +80,8 @@ function makeDataRequest(poke) {
         }
         if (statTotal < 430) {
             console.log(data.name + " stat total of " + statTotal + " is too small");
-            requestDone++;
+            successfullRequests++;
+            showCurrentInformation();
             return;
         }
         console.log("*** " + data.name + " stat total of " + statTotal + " is good Enough");
@@ -97,9 +97,21 @@ function makeDataRequest(poke) {
         pokemon.push({ name: data.name, abilities: abilities, imageSrc: data.sprites.other['official-artwork'].front_default, stats: stats });
         pokemonAsJSON = { name: data.name, abilities: abilities, imageSrc: data.sprites.other['official-artwork'].front_default, stats: stats } + ",";
         document.getElementById("pokeJson").innerHTML += "{name: " + data.name + ", abilities: " + abilities + ", imageSrc: " + data.sprites.other['official-artwork'].front_default + ", stats: " + stats + "},";
-        requestDone++;
+        successfullRequests++;
+        showCurrentInformation();
     });
 }
+function showCurrentInformation() {
+    var _a;
+    document.getElementById("pokeJson").innerHTML = "Total Requests: " + aviablePokemon.length + "\nSuccessfull: " + successfullRequests + "\nFailed Requests: " + failedRequests + "\n" + JSON.stringify(pokemon[pokemon.length - 1]);
+    if (successfullRequests + failedRequests == aviablePokemon.length) {
+        document.getElementById('button2').onclick = function () {
+            createJson();
+        };
+        (_a = document.getElementById("button2")) === null || _a === void 0 ? void 0 : _a.classList.add("active");
+    }
+}
 function createJson() {
-    //print json.stringify pokemon[]
+    var blob = new Blob([JSON.stringify(pokemon)], { type: "text/plain;charset=utf-8" });
+    saveAs(blob, "pokemon.json");
 }
