@@ -1,15 +1,15 @@
-let aviablePokemon: number[] = [];
-let pokemon: any[] = [];
-let abilities: any;
-let stats: number[];
-let imgUrl: string;
-let statTotal: number;
-let successfullRequests: number = 0;
+let aviablePokemon: number[] = []; //id's off all avaible pokemon
+let pokemon: any[] = []; //save all data of pokemon
+let abilities: string[]; //save abillities of pokemon
+let stats: number[]; //save stats of pokemon
+let imgUrl: string; //save image link of pokemon
+let statTotal: number; //only save pokemon with a statTotal > 430
+let successfullRequests: number = 0; 
 let failedRequests: number = 0;
-let pokemonAsJSON: any;
 
 declare let saveAs: any;
 
+//API request
 let getJSON = function (url: any, callback: any) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -27,8 +27,8 @@ let getJSON = function (url: any, callback: any) {
 };
 
 function getPokemonIds() {
-    document.getElementById('button1')!.onclick = function (){};
-    document.getElementById("button1")?.classList.remove("active");
+    turnOffButton("button1")
+    //Save all ID's in avaiblePokemon
     getJSON("https://pokeapi.co/api/v2/pokedex/31", function (err: any, data: any) {
         if (err !== null) {
             alert('Something went wrong: ' + err);
@@ -48,15 +48,12 @@ function getPokemonIds() {
 }
 
 function nextStep(){
-    document.getElementById('button2')!.onclick = function (){};
-    document.getElementById("button2")?.classList.remove("active");
+    turnOffButton("button2")
     document.getElementById('button1')!.onclick = function (){
-        document.getElementById("pokeJson")!.innerText = "";
         for (let i = 0; i < aviablePokemon.length; i++) {
             makeDataRequest(aviablePokemon[i]);
         }
-        document.getElementById('button1')!.onclick = function(){};
-        document.getElementById("button1")?.classList.remove("active");
+        turnOffButton("button1")
     };
     document.getElementById("button1")?.classList.add("active");
     document.getElementById("button1")!.innerText = "Pokemondaten holen";
@@ -68,7 +65,7 @@ function nextStep(){
 function makeDataRequest(poke: number) {
     getJSON("https://pokeapi.co/api/v2/pokemon/" + poke, function (err: any, data: any) {
         if (err !== null) {
-            //alert('Something went wrong: ' + err);
+            alert('Something went wrong: ' + err);
             failedRequests++;
             showCurrentInformation()
             return;
@@ -82,12 +79,10 @@ function makeDataRequest(poke: number) {
             statTotal = statTotal + stats[i];
         }
         if (statTotal < 430) {
-            console.log(data.name + " stat total of " + statTotal + " is too small");
             successfullRequests++;
             showCurrentInformation()
             return;
         }
-        console.log("*** " + data.name + " stat total of " + statTotal + " is good Enough");
         abilities = [];
         for (let i = 0; i < data.abilities.length; i++) {
             abilities.push(data.abilities[i].ability.name);
@@ -97,14 +92,14 @@ function makeDataRequest(poke: number) {
                 abilities.pop();
             }
         }
+        //Push all Data into Pokemon
         pokemon.push({ name: data.name, abilities: abilities, imageSrc: data.sprites.other['official-artwork'].front_default, stats: stats });
-        pokemonAsJSON = {name: data.name, abilities: abilities, imageSrc: data.sprites.other['official-artwork'].front_default, stats: stats}+",";
-        document.getElementById("pokeJson")!.innerHTML += "{name: "+data.name+", abilities: "+abilities+", imageSrc: "+data.sprites.other['official-artwork'].front_default+", stats: "+stats+"},";
         successfullRequests++;
         showCurrentInformation()
     });
 }
 
+//Show user what is going on
 function showCurrentInformation(){
     document.getElementById("pokeJson")!.innerHTML = "Total Requests: "+aviablePokemon.length + "\nSuccessfull: "+successfullRequests+"\nFailed Requests: "+failedRequests+"\n"+JSON.stringify(pokemon[pokemon.length-1]);
     if(successfullRequests+failedRequests == aviablePokemon.length){
@@ -115,7 +110,14 @@ function showCurrentInformation(){
     }
 }
 
+//From Filesaver.js
 function createJson() {
     var blob = new Blob([JSON.stringify(pokemon)], {type: "text/plain;charset=utf-8"});
     saveAs(blob, "pokemon.json"); 
+}
+//reduce redundant code
+function turnOffButton(buttonName: string): void{
+    let button = document.getElementById(buttonName);
+    button!.classList.remove("active");
+    button!.onclick = function(){};
 }
